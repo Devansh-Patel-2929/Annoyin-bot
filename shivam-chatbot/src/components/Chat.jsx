@@ -28,6 +28,31 @@ const STATS_DATABASE = {
   }
 };
 
+// Add error state
+const [error, setError] = useState('');
+
+const sendMessage = async () => {
+  try {
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: input })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Unknown error');
+    }
+
+    const data = await response.json();
+    setMessages(prev => [...prev, { text: data.reply, isBot: true }]);
+
+  } catch (error) {
+    setError(`🚛 ERROR: ${error.message}`);
+    setTimeout(() => setError(''), 5000);
+  }
+};
+
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
